@@ -9,9 +9,6 @@ import (
 	"time"
 
 	"github.com/pion/webrtc/v3"
-
-	// import signal.go from the same directory as this file
-	"nannnoda.com/pngtuber/signal"
 )
 
 func get404(w http.ResponseWriter) {
