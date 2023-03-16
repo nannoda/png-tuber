@@ -1,6 +1,16 @@
 (() => {
+  // consts.ts
+  var REMOTE_ID_API = "/api/remoteId";
+
   // index.ts
-  console.log("2");
+  console.log("3");
+  async function postRemoteId(localId) {
+    const response = await fetch(REMOTE_ID_API, {
+      method: "POST",
+      body: localId
+    });
+    console.log(response);
+  }
   async function main() {
     const peerConnection = new RTCPeerConnection({
       iceServers: [
@@ -31,7 +41,9 @@
       } else {
         console.log("candidate: null");
         if (peerConnection.localDescription) {
-          console.log("localDescription: " + btoa(JSON.stringify(peerConnection.localDescription)));
+          const localId = btoa(JSON.stringify(peerConnection.localDescription));
+          console.log("localDescription: " + localId);
+          postRemoteId(localId);
         }
       }
     };
