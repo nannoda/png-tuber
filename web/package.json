@@ -1,0 +1,16 @@
+{
+  "name": "png-tuber-html",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "serve": "node build.mjs serve",
+    "watch": "node build.mjs watch",
+    "build": "node build.mjs build"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "esbuild": "^0.17.11"
+  }
+}

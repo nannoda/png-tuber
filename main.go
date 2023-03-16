@@ -1,15 +1,79 @@
-package main
+package pngtuber
 
 import (
 	"fmt"
+	"log"
+	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/pion/webrtc/v3"
+
+	// import signal.go from the same directory as this file
 	"nannnoda.com/pngtuber/utils/signal"
 )
 
+func get404(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(http.StatusNotFound)
+	w.Write([]byte("404 Not Found"))
+}
+
+func setContentType(fileExtension string, w http.ResponseWriter) {
+	if fileExtension == "html" {
+		w.Header().Set("Content-Type", "text/html")
+	}
+	if fileExtension == "css" {
+		w.Header().Set("Content-Type", "text/css")
+	}
+	if fileExtension == "js" {
+		w.Header().Set("Content-Type", "text/javascript")
+	}
+	if fileExtension == "png" {
+		w.Header().Set("Content-Type", "image/png")
+	}
+	if fileExtension == "jpg" {
+		w.Header().Set("Content-Type", "image/jpeg")
+	}
+	if fileExtension == "jpeg" {
+		w.Header().Set("Content-Type", "image/jpeg")
+	}
+	if fileExtension == "gif" {
+		w.Header().Set("Content-Type", "image/gif")
+	}
+	if fileExtension == "svg" {
+		w.Header().Set("Content-Type", "image/svg+xml")
+	}
+}
+
+func returnFile(filePath string, w http.ResponseWriter) {
+	// file extension is the characters after the last dot
+	fileExtension := filePath[strings.LastIndex(filePath, ".")+1:]
+	dat, err := os.ReadFile(filePath)
+	if err != nil {
+		get404(w)
+		// return err
+	}
+	setContentType(fileExtension, w)
+	w.WriteHeader(http.StatusOK)
+	w.Write(dat)
+}
+
+func handleHttp(w http.ResponseWriter, r *http.Request) {
+	log.Default().Println("Request received: " + r.URL.Path + " " + r.Method + " " + r.RemoteAddr + " ")
+	// remove the first slash
+	filePath := r.URL.Path[1:]
+	log.Default().Println("Path: " + filePath)
+	returnFile(filePath, w)
+}
+
 func main() {
+	port := 5100
+	if len(os.Args) > 1 {
+		portStr := os.Args[1]
+		port = int(portStr[0])
+	}
 
 	config := webrtc.Configuration{
 		ICEServers: []webrtc.ICEServer{
@@ -34,6 +98,7 @@ func main() {
 	// This will notify you when the peer has connected/disconnected
 	peerConnection.OnConnectionStateChange(func(s webrtc.PeerConnectionState) {
 		fmt.Printf("Peer Connection State has changed: %s\n", s.String())
+
 		if s == webrtc.PeerConnectionStateFailed {
 			// Wait until PeerConnection has had no network activity for 30 seconds or another failure. It may be reconnected using an ICE Restart.
 			// Use webrtc.PeerConnectionStateDisconnected if you are interested in detecting faster timeout.
@@ -69,39 +134,7 @@ func main() {
 		})
 	})
 
-	// Wait for the offer to be pasted
-	offer := webrtc.SessionDescription{}
-	signal.Decode(signal.MustReadStdin(), &offer)
-
-	// Set the remote SessionDescription
-	err = peerConnection.SetRemoteDescription(offer)
-	if err != nil {
-		panic(err)
-	}
-
-	// Create an answer
-	answer, err := peerConnection.CreateAnswer(nil)
-	if err != nil {
-		panic(err)
-	}
-
-	// Create channel that is blocked until ICE Gathering is complete
-	gatherComplete := webrtc.GatheringCompletePromise(peerConnection)
-
-	// Sets the LocalDescription, and starts our UDP listeners
-	err = peerConnection.SetLocalDescription(answer)
-	if err != nil {
-		panic(err)
-	}
-
-	// Block until ICE Gathering is complete, disabling trickle ICE
-	// we do this because we only can exchange one signaling message
-	// in a production application you should exchange ICE Candidates via OnICECandidate
-	<-gatherComplete
-
-	// Output the answer in base64 so we can paste it in browser
-	fmt.Println(signal.Encode(*peerConnection.LocalDescription()))
-
-	// Block forever
-	select {}
+	http.HandleFunc("/", handleHttp)
+	log.Fatal(http.ListenAndServe(
+		fmt.Sprintf(":%d", port), nil))
 }
