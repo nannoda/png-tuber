@@ -6,15 +6,14 @@ import (
 	"time"
 
 	"github.com/pion/webrtc/v3"
-
-	// import signal.go from the same directory as this file
 	"nannnoda.com/pngtuber/utils/signal"
 )
 
-func main() {
-	// Everything below is the Pion WebRTC API! Thanks for using it ❤️.
+// import signal.go from the same directory as this file
 
-	// Prepare the configuration
+func CreatePeerConnection(remoteId string, onMessageString chan string) {
+	onMessageString <- "CreatePeerConnection"
+
 	config := webrtc.Configuration{
 		ICEServers: []webrtc.ICEServer{
 			{
@@ -70,15 +69,14 @@ func main() {
 
 		// Register text message handling
 		d.OnMessage(func(msg webrtc.DataChannelMessage) {
+			onMessageString <- string(msg.Data)
 			fmt.Printf("Message from DataChannel '%s': '%s'\n", d.Label(), string(msg.Data))
 		})
 	})
 
 	// Wait for the offer to be pasted
 	offer := webrtc.SessionDescription{}
-	// base64Desc := "eyJ0eXBlIjoib2ZmZXIiLCJzZHAiOiJ2PTBcclxubz0tIDE0Njk3NDE2MzU5MjUyMTA4MjIgMiBJTiBJUDQgMTI3LjAuMC4xXHJcbnM9LVxyXG50PTAgMFxyXG5hPWdyb3VwOkJVTkRMRSAwXHJcbmE9ZXh0bWFwLWFsbG93LW1peGVkXHJcbmE9bXNpZC1zZW1hbnRpYzogV01TXHJcbm09YXBwbGljYXRpb24gNTE5MzcgVURQL0RUTFMvU0NUUCB3ZWJydGMtZGF0YWNoYW5uZWxcclxuYz1JTiBJUDQgNzUuMTI4LjIxNy4xMTRcclxuYT1jYW5kaWRhdGU6MjE5Njk5NjIzMyAxIHVkcCAyMTEzOTM3MTUxIDRkNjM1Yjg1LTczYjYtNDMzYy1hYzFhLTI5Y2UwMTc5NzhlZS5sb2NhbCA1MTkzNyB0eXAgaG9zdCBnZW5lcmF0aW9uIDAgbmV0d29yay1jb3N0IDk5OVxyXG5hPWNhbmRpZGF0ZTozMDk4NDQ2NDQ5IDEgdWRwIDE2Nzc3Mjk1MzUgNzUuMTI4LjIxNy4xMTQgNTE5MzcgdHlwIHNyZmx4IHJhZGRyIDAuMC4wLjAgcnBvcnQgMCBnZW5lcmF0aW9uIDAgbmV0d29yay1jb3N0IDk5OVxyXG5hPWljZS11ZnJhZzpaTURYXHJcbmE9aWNlLXB3ZDp6WEJpUmRMVXQybm1KZldOSzB4SlRuaGRcclxuYT1pY2Utb3B0aW9uczp0cmlja2xlXHJcbmE9ZmluZ2VycHJpbnQ6c2hhLTI1NiA3QzoyODo3NDo5MDo1MTpERDo1RDpERTpERDo4ODoyNDo3NjoyQzowNTpBRTpCNjpERjowQzo4RDozRjoyRjo4MDpGRjpCQzowRTozRjo3NjoxNDo4Mjo3MjowNTpFMlxyXG5hPXNldHVwOmFjdHBhc3NcclxuYT1taWQ6MFxyXG5hPXNjdHAtcG9ydDo1MDAwXHJcbmE9bWF4LW1lc3NhZ2Utc2l6ZToyNjIxNDRcclxuIn0="
-	// signal.Decode(signal.MustReadStdin(), &offer)
-	signal.Decode(base64Desc, &offer)
+	signal.Decode(remoteId, &offer)
 
 	// Set the remote SessionDescription
 	err = peerConnection.SetRemoteDescription(offer)
@@ -111,4 +109,19 @@ func main() {
 
 	// Block forever
 	select {}
+}
+
+func main() {
+	onMessageString := make(chan string)
+
+	remoteId := signal.MustReadStdin()
+
+	go CreatePeerConnection(remoteId, onMessageString)
+
+	for {
+		select {
+		case msg := <-onMessageString:
+			fmt.Println(msg)
+		}
+	}
 }
