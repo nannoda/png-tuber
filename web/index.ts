@@ -27,6 +27,8 @@ async function main() {
     }
 
     sendChannel.onmessage = (event) => {
+        console.log(`type: ${typeof event.data}`);
+
         console.log("sendChannel message: " + event.data);
     }
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"time"
@@ -74,11 +75,9 @@ func CreatePeerConnection(remoteId string, onMessageString chan string) {
 		})
 	})
 
-	// Wait for the offer to be pasted
 	offer := webrtc.SessionDescription{}
 	signal.Decode(remoteId, &offer)
 
-	// Set the remote SessionDescription
 	err = peerConnection.SetRemoteDescription(offer)
 	if err != nil {
 		panic(err)
@@ -90,21 +89,14 @@ func CreatePeerConnection(remoteId string, onMessageString chan string) {
 		panic(err)
 	}
 
-	// Create channel that is blocked until ICE Gathering is complete
 	gatherComplete := webrtc.GatheringCompletePromise(peerConnection)
 
-	// Sets the LocalDescription, and starts our UDP listeners
 	err = peerConnection.SetLocalDescription(answer)
 	if err != nil {
 		panic(err)
 	}
-
-	// Block until ICE Gathering is complete, disabling trickle ICE
-	// we do this because we only can exchange one signaling message
-	// in a production application you should exchange ICE Candidates via OnICECandidate
 	<-gatherComplete
 
-	// Output the answer in base64 so we can paste it in browser
 	fmt.Println(signal.Encode(*peerConnection.LocalDescription()))
 
 	// Block forever
@@ -113,8 +105,10 @@ func CreatePeerConnection(remoteId string, onMessageString chan string) {
 
 func main() {
 	onMessageString := make(chan string)
-
-	remoteId := signal.MustReadStdin()
+	fmt.Println("Enter remoteId:")
+	reader := bufio.NewReader(os.Stdin)
+	remoteId, _ := reader.ReadString('\n')
+	fmt.Printf("remoteId: [%s]", remoteId)
 
 	go CreatePeerConnection(remoteId, onMessageString)
 

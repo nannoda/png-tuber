@@ -19,6 +19,7 @@
       console.log("sendChannel open");
     };
     sendChannel.onmessage = (event) => {
+      console.log(`type: ${typeof event.data}`);
       console.log("sendChannel message: " + event.data);
     };
     sendChannel.onclose = () => {
