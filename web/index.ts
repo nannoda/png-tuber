@@ -1,17 +1,8 @@
 import { REMOTE_ID_API } from "./consts";
 
-async function getText(url: string) {
-    const response = await fetch(url);
-    return await response.text();
-}
 console.log("3");
 
-
-
-
 async function main() {
-
-
     const peerConnection = new RTCPeerConnection({
         iceServers: [
             {
@@ -19,7 +10,6 @@ async function main() {
             }
         ]
     });
-
     const setSession = (base64Str: string) => {
         const session = JSON.parse(atob(base64Str));
         peerConnection.setRemoteDescription(session);
@@ -67,7 +57,6 @@ async function main() {
 
     const offer = await peerConnection.createOffer();
     await peerConnection.setLocalDescription(offer);
-
 }
 
 main();

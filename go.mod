@@ -5,6 +5,11 @@ go 1.18
 require github.com/pion/webrtc/v3 v3.1.58
 
 require (
+	github.com/gen2brain/malgo v0.11.10 // indirect
+	golang.org/x/image v0.2.0 // indirect
+)
+
+require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/pion/datachannel v1.5.5 // indirect
 	github.com/pion/dtls/v2 v2.2.6 // indirect
@@ -12,6 +17,7 @@ require (
 	github.com/pion/interceptor v0.1.12 // indirect
 	github.com/pion/logging v0.2.2 // indirect
 	github.com/pion/mdns v0.0.7 // indirect
+	github.com/pion/mediadevices v0.4.0
 	github.com/pion/randutil v0.1.0 // indirect
 	github.com/pion/rtcp v1.2.10 // indirect
 	github.com/pion/rtp v1.7.13 // indirect
