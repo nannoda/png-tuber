@@ -11,21 +11,20 @@ import (
 func main() {
 
 	remoteIdChan := make(chan string)
-	onMessageString := make(chan string)
+	localIdChan := make(chan string)
+	onMessageChan := make(chan string)
 
 	println("Starting server...")
-	go utils.ServeWeb(remoteIdChan)
+	go utils.ServeWeb(remoteIdChan, localIdChan)
 
 	println("Waiting for remoteId...")
 	remoteId := <-remoteIdChan
 
-	// fmt.Printf("remoteId: [%s]\n", remoteId)
-
-	utils.CreatePeerConnection(remoteId, onMessageString)
+	go utils.CreatePeerConnection(remoteId, localIdChan, onMessageChan)
 
 	for {
 		select {
-		case msg := <-onMessageString:
+		case msg := <-onMessageChan:
 			fmt.Println(msg)
 		}
 	}

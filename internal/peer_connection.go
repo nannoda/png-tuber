@@ -9,12 +9,8 @@ import (
 	"nannnoda.com/pngtuber/utils/signal"
 )
 
-func CreatePeerConnection(remoteId string, onMessageString chan string) {
+func CreatePeerConnection(remoteId string, localIdChan chan string, onMessageChan chan string) {
 	fmt.Println("CreatePeerConnection")
-	// onMessageString <- "CreatePeerConnection"
-
-	fmt.Println("CreatePeerConnection2")
-
 	config := webrtc.Configuration{
 		ICEServers: []webrtc.ICEServer{
 			{
@@ -40,9 +36,6 @@ func CreatePeerConnection(remoteId string, onMessageString chan string) {
 		fmt.Printf("Peer Connection State has changed: %s\n", s.String())
 
 		if s == webrtc.PeerConnectionStateFailed {
-			// Wait until PeerConnection has had no network activity for 30 seconds or another failure. It may be reconnected using an ICE Restart.
-			// Use webrtc.PeerConnectionStateDisconnected if you are interested in detecting faster timeout.
-			// Note that the PeerConnection may come back from PeerConnectionStateDisconnected.
 			fmt.Println("Peer Connection has gone to failed exiting")
 			os.Exit(0)
 		}
@@ -68,15 +61,15 @@ func CreatePeerConnection(remoteId string, onMessageString chan string) {
 
 		// Register text message handling
 		d.OnMessage(func(msg webrtc.DataChannelMessage) {
-			onMessageString <- string(msg.Data)
+			onMessageChan <- string(msg.Data)
 			fmt.Printf("Message from DataChannel '%s': '%s'\n", d.Label(), string(msg.Data))
 		})
 	})
 
 	offer := webrtc.SessionDescription{}
-	fmt.Println("remoteId: ", remoteId)
+	// fmt.Println("remoteId: ", remoteId)
 	signal.Decode(remoteId, &offer)
-	fmt.Printf("offer: %v %v", offer.Type, offer.SDP)
+	// fmt.Printf("offer: %v %v", offer.Type, offer.SDP)
 
 	err = peerConnection.SetRemoteDescription(offer)
 	if err != nil {
@@ -97,7 +90,9 @@ func CreatePeerConnection(remoteId string, onMessageString chan string) {
 	}
 	<-gatherComplete
 
-	fmt.Println(signal.Encode(*peerConnection.LocalDescription()))
+	localId := signal.Encode(*peerConnection.LocalDescription())
+	localIdChan <- localId
+	fmt.Println("localId: ", localId)
 
 	// Block forever
 	select {}

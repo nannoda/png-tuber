@@ -4,13 +4,6 @@
 
   // index.ts
   console.log("3");
-  async function postRemoteId(localId) {
-    const response = await fetch(REMOTE_ID_API, {
-      method: "POST",
-      body: localId
-    });
-    console.log(response);
-  }
   async function main() {
     const peerConnection = new RTCPeerConnection({
       iceServers: [
@@ -35,6 +28,16 @@
     sendChannel.onclose = () => {
       console.log("sendChannel close");
     };
+    async function connectToRemote(localId) {
+      const response = await fetch(REMOTE_ID_API, {
+        method: "POST",
+        body: localId,
+        cache: "no-cache"
+      });
+      const removeId = await response.text();
+      console.log("remoteId: " + removeId);
+      setSession(removeId);
+    }
     peerConnection.onicecandidate = (event) => {
       if (event.candidate) {
         console.log("candidate: " + event.candidate.candidate);
@@ -43,7 +46,7 @@
         if (peerConnection.localDescription) {
           const localId = btoa(JSON.stringify(peerConnection.localDescription));
           console.log("localDescription: " + localId);
-          postRemoteId(localId);
+          connectToRemote(localId);
         }
       }
     };

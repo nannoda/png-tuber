@@ -36,7 +36,7 @@ func handleIndexJS(w http.ResponseWriter, r *http.Request) {
 	w.Write(dat)
 }
 
-func handleRemoteIdApi(removeId chan string, w http.ResponseWriter, r *http.Request) {
+func handleRemoteIdApi(removeIdChan chan string, localIdChan chan string, w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -45,24 +45,26 @@ func handleRemoteIdApi(removeId chan string, w http.ResponseWriter, r *http.Requ
 		}
 		bodyStr := "" + string(body)
 		// fmt.Printf("handleRemoteIdApi POST body: [%s]\n", bodyStr)
-		removeId <- bodyStr
+		removeIdChan <- bodyStr
 		fmt.Printf("sent remoteId to removeId channel.\n")
-		w.Header().Set("Content-Type", "text/plain")
+
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
+		// localId := <-localIdChan
+		fmt.Printf("received localId from localId channel.\n")
+		w.Header().Set("Content-Type", "text/plain")
+		w.Write([]byte(<-localIdChan))
 	} else {
 		fmt.Println("Method not allowed: ", r.Method)
 	}
 }
 
-func ServeWeb(removeId chan string) {
+func ServeWeb(removeId chan string, localId chan string) {
 	http.HandleFunc("/", handle404)
 	http.HandleFunc("/index.html", handleIndexHTML)
 	http.HandleFunc("/index.js", handleIndexJS)
 	http.HandleFunc("/api/remoteId", func(w http.ResponseWriter, r *http.Request) {
-		handleRemoteIdApi(removeId, w, r)
+		handleRemoteIdApi(removeId, localId, w, r)
 	})
-
 	log.Fatal(
 		http.ListenAndServe(
 			fmt.Sprintf(":%d", 6060),
