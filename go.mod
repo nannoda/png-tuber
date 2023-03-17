@@ -5,11 +5,15 @@ go 1.18
 require github.com/pion/webrtc/v3 v3.1.58
 
 require (
+	github.com/faiface/beep v1.1.0 // indirect
 	github.com/gen2brain/malgo v0.11.10 // indirect
+	github.com/gordonklaus/portaudio v0.0.0-20180817120803-00e7307ccd93 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	golang.org/x/image v0.2.0 // indirect
 )
 
 require (
+	github.com/MarkKremer/microphone v1.1.0
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/pion/datachannel v1.5.5 // indirect
 	github.com/pion/dtls/v2 v2.2.6 // indirect
