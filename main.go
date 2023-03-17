@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/MarkKremer/microphone"
-	"github.com/faiface/beep/wav"pkg-config
+	"github.com/faiface/beep/wav"
 	utils "nannnoda.com/pngtuber/internal"
 )
 
