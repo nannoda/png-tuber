@@ -2,14 +2,14 @@ module nannnoda.com/pngtuber
 
 go 1.18
 
-require github.com/pion/webrtc/v3 v3.1.58
+require (
+	github.com/faiface/beep v1.1.0
+	github.com/pion/webrtc/v3 v3.1.58
+)
 
 require (
-	github.com/faiface/beep v1.1.0 // indirect
-	github.com/gen2brain/malgo v0.11.10 // indirect
 	github.com/gordonklaus/portaudio v0.0.0-20180817120803-00e7307ccd93 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	golang.org/x/image v0.2.0 // indirect
 )
 
 require (
@@ -21,8 +21,7 @@ require (
 	github.com/pion/interceptor v0.1.12 // indirect
 	github.com/pion/logging v0.2.2 // indirect
 	github.com/pion/mdns v0.0.7 // indirect
-	github.com/pion/mediadevices v0.4.0
-	github.com/pion/randutil v0.1.0 // indirect
+	github.com/pion/randutil v0.1.0
 	github.com/pion/rtcp v1.2.10 // indirect
 	github.com/pion/rtp v1.7.13 // indirect
 	github.com/pion/sctp v1.8.6 // indirect
